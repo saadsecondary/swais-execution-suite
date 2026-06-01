@@ -1,6 +1,7 @@
 import { Twitter, Linkedin, Instagram } from "lucide-react";
 import { Link } from "react-router-dom";
 import Wordmark from "@/components/swais/Wordmark";
+import { copyEmailHandler } from "@/lib/copyEmail";
 
 const socials = [
   { Icon: Twitter, label: "SWAIS on X" },
