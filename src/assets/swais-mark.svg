@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1E54FF"/>
+      <stop offset="1" stop-color="#0A2BB8"/>
+    </linearGradient>
+    <linearGradient id="wave" x1="0" y1="32" x2="64" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5A8BFF" stop-opacity="0.0"/>
+      <stop offset="0.5" stop-color="#A9C4FF" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#5A8BFF" stop-opacity="0.0"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <path d="M0 44 C 16 30, 32 58, 48 40 S 64 30, 64 30 L 64 64 L 0 64 Z" fill="url(#wave)" opacity="0.6"/>
+  <path d="M0 22 C 18 38, 30 6, 50 18 S 64 30, 64 30" stroke="#A9C4FF" stroke-opacity="0.35" stroke-width="1" fill="none"/>
+  <text x="32" y="40" text-anchor="middle" font-family="Geist, system-ui, sans-serif" font-size="20" font-weight="800" letter-spacing="-0.5" fill="#FFFFFF">S</text>
+</svg>
