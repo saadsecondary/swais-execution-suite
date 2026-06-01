@@ -31,7 +31,7 @@ const Process = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.2 }}
+          viewport={{ once: false, amount: 0.15, margin: "0px 0px -60px 0px" }}
           className="max-w-3xl mb-16"
         >
           <p className="text-cobalt-bright text-[11px] tracking-[0.3em] uppercase font-mono mb-5">
@@ -52,7 +52,7 @@ const Process = () => {
               key={s.n}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false, amount: 0.2 }}
+              viewport={{ once: false, amount: 0.15, margin: "0px 0px -60px 0px" }}
               transition={{ duration: 0.6, delay: i * 0.12 }}
               className="relative glass rounded-3xl p-8 hover:border-cobalt/30 transition-all duration-500 group"
             >

@@ -41,7 +41,7 @@ const Products = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.2 }}
+          viewport={{ once: false, amount: 0.15, margin: "0px 0px -60px 0px" }}
           className="max-w-3xl mx-auto text-center mb-14 md:mb-20"
         >
           <p className="text-cobalt-bright text-[11px] tracking-[0.3em] uppercase font-mono mb-5">
@@ -63,7 +63,7 @@ const Products = () => {
               key={p.code}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false, amount: 0.2 }}
+              viewport={{ once: false, amount: 0.15, margin: "0px 0px -60px 0px" }}
               transition={{ duration: 0.55, delay: i * 0.08 }}
               className="group relative bg-ink p-7 sm:p-9 md:p-12 transition-all duration-500 hover:bg-navy-deep flex flex-col"
             >

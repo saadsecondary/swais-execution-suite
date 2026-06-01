@@ -173,7 +173,7 @@ const CTASection = () => {
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false, amount: 0.2 }}
+            viewport={{ once: false, amount: 0.15, margin: "0px 0px -60px 0px" }}
             animate={{ opacity: isActive ? 0.35 : 1, filter: isActive ? "blur(2px)" : "blur(0px)" }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -214,7 +214,7 @@ const CTASection = () => {
             }}
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false, amount: 0.2 }}
+            viewport={{ once: false, amount: 0.15, margin: "0px 0px -60px 0px" }}
             animate={{
               scale: isActive ? 1.03 : 1,
               boxShadow: isActive

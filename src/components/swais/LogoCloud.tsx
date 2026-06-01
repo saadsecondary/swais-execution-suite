@@ -74,7 +74,7 @@ const LogoCloud = () => {
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: false, amount: 0.2 }}
+          viewport={{ once: false, amount: 0.15, margin: "0px 0px -60px 0px" }}
           className="text-center text-[11px] tracking-[0.3em] uppercase text-ice/40 font-mono mb-10"
         >
           Built for seamless workflows with trusted platforms

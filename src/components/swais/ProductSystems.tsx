@@ -414,7 +414,7 @@ const Motif = ({ kind }: { kind: MotifKind }) => {
               strokeWidth="1.2"
               initial={{ pathLength: 0, opacity: 0 }}
               whileInView={{ pathLength: 1, opacity: 1 }}
-              viewport={{ once: true }}
+              viewport={{ once: false, amount: 0.15, margin: "0px 0px -80px 0px" }}
               transition={{ duration: 1.6, delay: i * 0.15, ease: [0.22, 1, 0.36, 1] }}
             />
           ))}
@@ -524,7 +524,7 @@ const Motif = ({ kind }: { kind: MotifKind }) => {
               strokeWidth="1"
               initial={{ opacity: 0, x: b.x - 80 }}
               whileInView={{ opacity: 1, x: b.x }}
-              viewport={{ once: true }}
+              viewport={{ once: false, amount: 0.15, margin: "0px 0px -80px 0px" }}
               transition={{
                 duration: 0.7,
                 delay: b.d,
@@ -559,7 +559,7 @@ const Motif = ({ kind }: { kind: MotifKind }) => {
           strokeWidth="1.5"
           initial={{ opacity: 0, scale: 0.94 }}
           whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.15, margin: "0px 0px -80px 0px" }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         />
         {/* Screen */}
@@ -572,7 +572,7 @@ const Motif = ({ kind }: { kind: MotifKind }) => {
           fill="url(#phoneScreen)"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.15, margin: "0px 0px -80px 0px" }}
           transition={{ duration: 0.6, delay: 0.3 }}
         />
         {/* Notch */}
@@ -585,7 +585,7 @@ const Motif = ({ kind }: { kind: MotifKind }) => {
           fill="hsl(222 78% 6%)"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.15, margin: "0px 0px -80px 0px" }}
           transition={{ duration: 0.4, delay: 0.4 }}
         />
         {/* UI elements */}
@@ -608,7 +608,7 @@ const Motif = ({ kind }: { kind: MotifKind }) => {
             fill="hsl(var(--ice) / 0.85)"
             initial={{ opacity: 0, y: b.y + 8 }}
             whileInView={{ opacity: 1, y: b.y }}
-            viewport={{ once: true }}
+            viewport={{ once: false, amount: 0.15, margin: "0px 0px -80px 0px" }}
             transition={{ duration: 0.45, delay: b.d, ease: [0.22, 1, 0.36, 1] }}
           />
         ))}
@@ -621,7 +621,7 @@ const Motif = ({ kind }: { kind: MotifKind }) => {
           fill="hsl(var(--cobalt-bright) / 0.18)"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.15, margin: "0px 0px -80px 0px" }}
           transition={{ duration: 1.2, delay: 0.6 }}
           style={{ filter: "blur(28px)" }}
         />
@@ -701,7 +701,7 @@ const ProductBlock = ({ product, flip }: { product: Product; flip: boolean }) =>
     <motion.article
       initial={{ opacity: 0, y: 60 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
+      viewport={{ once: false, amount: 0.15, margin: "0px 0px -80px 0px" }}
       transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
       className="relative py-20 md:py-28 border-t border-ice/[0.06]"
     >
