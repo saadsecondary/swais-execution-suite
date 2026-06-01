@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Compass } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { getHeroVideo } from "@/lib/heroVideo";
+import { useEffect, useRef, useState } from "react";
 
 /**
- * Animated counter that ticks up to a target on mount.
+ * Animated counter that ticks up to a target whenever it enters the viewport,
+ * resetting each time it scrolls out so the animation re-triggers on return.
  */
 const Counter = ({
   to,
@@ -19,28 +19,44 @@ const Counter = ({
   delay?: number;
 }) => {
   const [val, setVal] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
     let raf = 0;
-    let started = false;
-    const startTimer = window.setTimeout(() => {
-      const start = performance.now();
-      const tick = (now: number) => {
-        const t = Math.min(1, (now - start) / (duration * 1000));
-        // ease [0.22, 1, 0.36, 1] approx
-        const eased = 1 - Math.pow(1 - t, 3);
-        setVal(Math.round(eased * to));
-        if (t < 1) raf = requestAnimationFrame(tick);
-      };
-      started = true;
-      raf = requestAnimationFrame(tick);
-    }, delay * 1000);
+    let startTimer = 0;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVal(0);
+          startTimer = window.setTimeout(() => {
+            const start = performance.now();
+            const tick = (now: number) => {
+              const t = Math.min(1, (now - start) / (duration * 1000));
+              const eased = 1 - Math.pow(1 - t, 3);
+              setVal(Math.round(eased * to));
+              if (t < 1) raf = requestAnimationFrame(tick);
+            };
+            raf = requestAnimationFrame(tick);
+          }, delay * 1000);
+        } else {
+          window.clearTimeout(startTimer);
+          cancelAnimationFrame(raf);
+        }
+      },
+      { threshold: 0.3 },
+    );
+    io.observe(el);
     return () => {
+      io.disconnect();
       window.clearTimeout(startTimer);
-      if (started) cancelAnimationFrame(raf);
+      cancelAnimationFrame(raf);
     };
   }, [to, duration, delay]);
+
   return (
-    <span>
+    <span ref={ref}>
       {val}
       {suffix}
     </span>
@@ -48,77 +64,51 @@ const Counter = ({
 };
 
 const Hero = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const videoSlotRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Mount the persistent hero <video> element into our slot so it survives
-  // route navigations and replays instantly on every return to the Home tab.
+  // Make sure the video plays the instant it can — never wait for full load.
   useEffect(() => {
-    const slot = videoSlotRef.current;
-    if (!slot) return;
-    const v = getHeroVideo();
+    const v = videoRef.current;
     if (!v) return;
-    slot.appendChild(v);
-    const playPromise = v.play();
-    if (playPromise && typeof playPromise.catch === "function") {
-      playPromise.catch(() => {});
-    }
+    const tryPlay = () => {
+      const p = v.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    };
+    tryPlay();
+    v.addEventListener("loadeddata", tryPlay, { once: true });
     return () => {
-      if (v.parentElement === slot) slot.removeChild(v);
+      v.removeEventListener("loadeddata", tryPlay);
     };
   }, []);
-
-  // Starfield
-  const stars = useMemo(
-    () =>
-      Array.from({ length: 90 }).map(() => ({
-        top: Math.random() * 100,
-        left: Math.random() * 100,
-        size: Math.random() * 2 + 0.5,
-        delay: Math.random() * 4,
-        duration: Math.random() * 3 + 2,
-      })),
-    [],
-  );
 
   return (
     <section
       id="top"
-      ref={containerRef}
       className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden"
+      // Match the dominant color of the first frame so any 1ms gap is invisible.
+      style={{ backgroundColor: "#04276d" }}
     >
-      <div
+      <video
+        ref={videoRef}
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
+        src="/hero-bg.mp4"
+        poster="/hero-poster.jpg"
+        preload="auto"
+        autoPlay
+        muted
+        loop
+        playsInline
+        // The native HTML attribute name is `playsinline` (no camelCase) on
+        // older Safari — set both to be safe.
+        // @ts-expect-error - lowercase attr for Safari
+        playsinline=""
+        // @ts-expect-error - tell the browser this is a priority asset
+        fetchpriority="high"
         aria-hidden="true"
-        className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_75%_60%_at_50%_45%,hsl(220_100%_28%),hsl(222_78%_10%)_70%)]"
       />
 
-      <div
-        ref={videoSlotRef}
-        aria-hidden="true"
-        className="absolute inset-0 z-0"
-      />
-
-
-      <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_70%_55%_at_50%_40%,hsl(220_100%_22%/0.35),transparent_75%)]" />
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-background/40 via-transparent to-background/85" />
-
-      <div className="absolute inset-0 pointer-events-none opacity-30 z-[1]">
-        {stars.map((s, i) => (
-          <span
-            key={i}
-            className="absolute rounded-full bg-ice animate-twinkle"
-            style={{
-              top: `${s.top}%`,
-              left: `${s.left}%`,
-              width: `${s.size}px`,
-              height: `${s.size}px`,
-              animationDelay: `${s.delay}s`,
-              animationDuration: `${s.duration}s`,
-            }}
-          />
-        ))}
-      </div>
-
+      {/* Bottom blend into the page background — NOT an overlay on the video,
+          purely a transition strip below the visible video area. */}
       <div className="absolute bottom-0 inset-x-0 h-72 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-[1]" />
 
       <div className="container-x relative z-10">
@@ -128,7 +118,6 @@ const Hero = () => {
           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
           className="max-w-5xl mx-auto text-center"
         >
-          {/* Eyebrow pill */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -142,7 +131,6 @@ const Hero = () => {
             <span className="text-ice/75">New · Direct consultations open with the SWAIS team</span>
           </motion.div>
 
-          {/* Headline */}
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[6.5rem] font-medium leading-[0.96] tracking-[-0.04em] text-balance">
             {["Automate", "the", "work,"].map((w, i) => (
               <motion.span
@@ -218,7 +206,6 @@ const Hero = () => {
             </Button>
           </motion.div>
 
-          {/* Animated metric strip */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -242,8 +229,6 @@ const Hero = () => {
           </motion.div>
         </motion.div>
       </div>
-
-      <div className="noise" />
     </section>
   );
 };
