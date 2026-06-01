@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +14,7 @@ import {
 import { ArrowRight, Mail, MessageCircle, Check, CalendarClock } from "lucide-react";
 import { Spotlight } from "@/components/ui/spotlight";
 import { toast } from "@/hooks/use-toast";
+import { copyEmailHandler } from "@/lib/copyEmail";
 
 const CAL_URL = "https://cal.com/swais";
 const WHATSAPP_NUMBER = "+1 503 508 8066";
@@ -51,6 +52,7 @@ type FormState = {
   service: string;
   source: string;
   goal: string;
+  subscribe: boolean;
 };
 
 const initialState: FormState = {
@@ -62,11 +64,39 @@ const initialState: FormState = {
   service: "",
   source: "",
   goal: "",
+  subscribe: true,
 };
+
+type Errors = Partial<Record<"name" | "company" | "email" | "phone" | "goal", string>>;
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const validate = (form: FormState): Errors => {
+  const errors: Errors = {};
+  if (!form.name.trim()) errors.name = "Please tell us your name.";
+  if (!form.company.trim()) errors.company = "Add your company or business name.";
+  if (!form.email.trim()) errors.email = "We need an email to reply to.";
+  else if (!EMAIL_RE.test(form.email.trim()))
+    errors.email = "That doesn't look like a valid email.";
+  if (!form.phone.trim()) errors.phone = "Add a phone number we can reach you on.";
+  if (!form.goal.trim()) errors.goal = "Tell us the outcome you're after.";
+  return errors;
+};
+
+const ErrorLine = ({ msg }: { msg?: string }) =>
+  msg ? (
+    <p className="mt-1.5 text-[12px] font-mono tracking-[0.05em] text-cobalt-bright/90 flex items-center gap-1.5">
+      <span className="h-1 w-1 rounded-full bg-cobalt-bright shadow-[0_0_8px_hsl(var(--cobalt-bright))]" />
+      {msg}
+    </p>
+  ) : null;
 
 const ContactSplit = () => {
   const [form, setForm] = useState<FormState>(initialState);
+  const [errors, setErrors] = useState<Errors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -75,19 +105,45 @@ const ContactSplit = () => {
     }
   }, []);
 
-  const [submitting, setSubmitting] = useState(false);
+  const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+    setForm((f) => ({ ...f, [key]: value }));
+    if (key in errors) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete (next as Record<string, string>)[key as string];
+        return next;
+      });
+    }
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const errs = validate(form);
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      // focus the first field with an error
+      const firstKey = Object.keys(errs)[0];
+      const el = formRef.current?.querySelector<HTMLElement>(`[name="${firstKey}"]`);
+      el?.focus();
+      return;
+    }
     setSubmitting(true);
     const serviceLabel =
       services.find((s) => s.value === form.service)?.label || form.service;
     const sourceLabel =
       sources.find((s) => s.value === form.source)?.label || form.source;
+
+    // Webhook payload — exact field order required.
     const payload = {
-      ...form,
-      serviceLabel,
-      sourceLabel,
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      heard: sourceLabel,
+      projectBrief: form.goal,
+      subscribeToNewsletter: form.subscribe ? "Subscribe" : "Not Subscribed",
+      company: form.company,
+      address: form.address,
+      service: serviceLabel,
       submittedAt: new Date().toISOString(),
       pageUrl: typeof window !== "undefined" ? window.location.href : "",
       userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
@@ -127,6 +183,7 @@ const ContactSplit = () => {
 
   const inputCls =
     "bg-ice/[0.03] border-ice/10 rounded-xl h-11 text-ice placeholder:text-ice/30 focus-visible:ring-cobalt/50 focus-visible:shadow-[0_0_0_4px_hsl(220_100%_60%/0.12)] transition-shadow";
+  const errCls = "border-cobalt-bright/60 shadow-[0_0_0_3px_hsl(220_100%_60%/0.18)]";
 
   return (
     <section id="contact" className="py-28 md:py-36 relative overflow-hidden">
@@ -139,7 +196,7 @@ const ContactSplit = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.2, margin: "-80px" }}
+            viewport={{ once: false, amount: 0.15, margin: "0px 0px -80px 0px" }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="lg:col-span-6"
           >
@@ -166,9 +223,6 @@ const ContactSplit = () => {
               </span>
             </div>
 
-
-
-
             <div className="mt-12 grid sm:grid-cols-2 gap-5">
               <a
                 href={WHATSAPP_LINK}
@@ -190,13 +244,17 @@ const ContactSplit = () => {
                 </p>
               </a>
 
-              <a href={`mailto:${EMAIL}`} className="group block">
+              <a
+                href={`mailto:${EMAIL}`}
+                onClick={copyEmailHandler(EMAIL)}
+                className="group block text-left"
+              >
                 <div className="h-12 w-12 rounded-2xl glass flex items-center justify-center mb-5 group-hover:border-cobalt-bright/40 transition-colors duration-500">
                   <Mail className="h-4.5 w-4.5 text-ice" strokeWidth={1.5} />
                 </div>
                 <h3 className="font-display text-lg font-medium text-ice tracking-tight">Email</h3>
                 <p className="text-ice/55 text-[13px] leading-relaxed mt-2">
-                  We reply within two business days.
+                  Click to copy. We reply within two business days.
                 </p>
                 <p className="mt-3 text-ice/85 text-sm font-medium group-hover:text-cobalt-bright transition-colors">
                   {EMAIL}
@@ -228,12 +286,12 @@ const ContactSplit = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.2, margin: "-80px" }}
+            viewport={{ once: false, amount: 0.15, margin: "0px 0px -80px 0px" }}
             transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
             className="lg:col-span-6 relative glass rounded-3xl p-7 md:p-9"
           >
             {!submitted ? (
-              <form onSubmit={onSubmit} className="space-y-5">
+              <form ref={formRef} onSubmit={onSubmit} noValidate className="space-y-5">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[11px] text-cobalt-bright tracking-[0.25em] uppercase">
                     Request consultation
@@ -250,12 +308,14 @@ const ContactSplit = () => {
                     </Label>
                     <Input
                       id="name"
-                      required
+                      name="name"
                       value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      onChange={(e) => update("name", e.target.value)}
                       placeholder="Jane Smith"
-                      className={inputCls}
+                      className={`${inputCls} ${errors.name ? errCls : ""}`}
+                      aria-invalid={!!errors.name}
                     />
+                    <ErrorLine msg={errors.name} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="company" className="text-xs text-ice/60 font-normal">
@@ -263,12 +323,14 @@ const ContactSplit = () => {
                     </Label>
                     <Input
                       id="company"
-                      required
+                      name="company"
                       value={form.company}
-                      onChange={(e) => setForm({ ...form, company: e.target.value })}
+                      onChange={(e) => update("company", e.target.value)}
                       placeholder="Acme Inc."
-                      className={inputCls}
+                      className={`${inputCls} ${errors.company ? errCls : ""}`}
+                      aria-invalid={!!errors.company}
                     />
+                    <ErrorLine msg={errors.company} />
                   </div>
                 </div>
 
@@ -279,13 +341,15 @@ const ContactSplit = () => {
                     </Label>
                     <Input
                       id="email"
+                      name="email"
                       type="email"
-                      required
                       value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      onChange={(e) => update("email", e.target.value)}
                       placeholder="jane@acme.com"
-                      className={inputCls}
+                      className={`${inputCls} ${errors.email ? errCls : ""}`}
+                      aria-invalid={!!errors.email}
                     />
+                    <ErrorLine msg={errors.email} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="text-xs text-ice/60 font-normal">
@@ -293,38 +357,37 @@ const ContactSplit = () => {
                     </Label>
                     <Input
                       id="phone"
+                      name="phone"
                       type="tel"
-                      required
                       value={form.phone}
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      onChange={(e) => update("phone", e.target.value)}
                       placeholder="+1 555 000 0000"
-                      className={inputCls}
+                      className={`${inputCls} ${errors.phone ? errCls : ""}`}
+                      aria-invalid={!!errors.phone}
                     />
+                    <ErrorLine msg={errors.phone} />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="address" className="text-xs text-ice/60 font-normal">
-                    Address{" "}
-                    <span className="text-ice/30 font-mono text-[10px] uppercase tracking-wider ml-1">
-                      Optional
-                    </span>
+                    Address
                   </Label>
                   <Input
                     id="address"
+                    name="address"
                     value={form.address}
-                    onChange={(e) => setForm({ ...form, address: e.target.value })}
+                    onChange={(e) => update("address", e.target.value)}
                     placeholder="Street, city, state, postal code, country"
                     autoComplete="street-address"
                     className={inputCls}
                   />
                 </div>
 
-
                 <div className="space-y-2">
                   <Label className="text-xs text-ice/60 font-normal">Service</Label>
                   <Select
                     value={form.service}
-                    onValueChange={(v) => setForm({ ...form, service: v })}
+                    onValueChange={(v) => update("service", v)}
                   >
                     <SelectTrigger className={inputCls}>
                       <SelectValue placeholder="Select a system" />
@@ -345,7 +408,7 @@ const ContactSplit = () => {
                   </Label>
                   <Select
                     value={form.source}
-                    onValueChange={(v) => setForm({ ...form, source: v })}
+                    onValueChange={(v) => update("source", v)}
                   >
                     <SelectTrigger className={inputCls}>
                       <SelectValue placeholder="Select an option" />
@@ -366,16 +429,56 @@ const ContactSplit = () => {
                   </Label>
                   <Textarea
                     id="goal"
-                    required
+                    name="goal"
                     value={form.goal}
-                    onChange={(e) => setForm({ ...form, goal: e.target.value })}
+                    onChange={(e) => update("goal", e.target.value)}
                     placeholder="What outcome do you want? More booked calls, less manual work, faster content..."
                     rows={4}
-                    className="bg-ice/[0.03] border-ice/10 rounded-xl resize-none text-ice placeholder:text-ice/30 focus-visible:ring-cobalt/50 focus-visible:shadow-[0_0_0_4px_hsl(220_100%_60%/0.12)] transition-shadow"
+                    className={`bg-ice/[0.03] border-ice/10 rounded-xl resize-none text-ice placeholder:text-ice/30 focus-visible:ring-cobalt/50 focus-visible:shadow-[0_0_0_4px_hsl(220_100%_60%/0.12)] transition-shadow ${
+                      errors.goal ? errCls : ""
+                    }`}
+                    aria-invalid={!!errors.goal}
                   />
+                  <ErrorLine msg={errors.goal} />
                 </div>
 
-                <Button type="submit" variant="cobalt" size="lg" className="w-full" disabled={submitting}>
+                {/* Newsletter subscribe — two-state, default checked */}
+                <button
+                  type="button"
+                  onClick={() => update("subscribe", !form.subscribe)}
+                  className={`w-full flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
+                    form.subscribe
+                      ? "border-cobalt-bright/40 bg-cobalt/10"
+                      : "border-ice/10 bg-ice/[0.02] hover:border-ice/20"
+                  }`}
+                  aria-pressed={form.subscribe}
+                >
+                  <span
+                    className={`h-5 w-5 rounded-md flex items-center justify-center border transition-colors ${
+                      form.subscribe
+                        ? "bg-gradient-cobalt border-cobalt-bright shadow-cobalt"
+                        : "border-ice/25 bg-transparent"
+                    }`}
+                  >
+                    {form.subscribe && <Check className="h-3 w-3 text-ice" strokeWidth={3} />}
+                  </span>
+                  <span className="flex-1">
+                    <span className="block text-sm text-ice font-medium">
+                      {form.subscribe ? "Subscribe" : "Not Subscribed"}
+                    </span>
+                    <span className="block text-[12px] text-ice/55 mt-0.5">
+                      Field notes from the SWAIS team — short, occasional, never spam.
+                    </span>
+                  </span>
+                </button>
+
+                <Button
+                  type="submit"
+                  variant="cobalt"
+                  size="lg"
+                  className="w-full"
+                  disabled={submitting}
+                >
                   {submitting ? "Sending…" : "Send Message"} <ArrowRight className="h-4 w-4" />
                 </Button>
                 <p className="text-[11px] text-ice/40 text-center font-mono uppercase tracking-wider">
