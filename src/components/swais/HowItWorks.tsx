@@ -86,13 +86,14 @@ const HowItWorks = () => {
 
           <div className="space-y-16">
             {steps.map((s, i) => {
-              const active = reached[i];
+              const orb = useOrbActive();
+              const active = orb.active;
               return (
                 <motion.div
                   key={s.n}
                   initial="hidden"
                   whileInView="visible"
-                  viewport={{ once: false, amount: 0.3, margin: "-80px" }}
+                  viewport={{ once: false, amount: 0.15, margin: "0px 0px -60px 0px" }}
                   variants={{
                     hidden: {},
                     visible: { transition: { staggerChildren: 0.1 } },
