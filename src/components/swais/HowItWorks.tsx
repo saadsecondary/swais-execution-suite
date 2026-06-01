@@ -112,6 +112,7 @@ const HowItWorks = () => {
                     className="relative z-10 flex sm:justify-center"
                   >
                     <div
+                      ref={orb.ref}
                       className="relative h-14 w-14 sm:h-20 sm:w-20 rounded-full flex items-center justify-center bg-background border overflow-hidden transition-all duration-500"
                       style={{
                         borderColor: active
