@@ -98,12 +98,7 @@ const Hero = () => {
         muted
         loop
         playsInline
-        // The native HTML attribute name is `playsinline` (no camelCase) on
-        // older Safari — set both to be safe.
-        // @ts-expect-error - lowercase attr for Safari
-        playsinline=""
-        // @ts-expect-error - tell the browser this is a priority asset
-        fetchpriority="high"
+        {...({ fetchpriority: "high", playsinline: "" } as Record<string, string>)}
         aria-hidden="true"
       />
 
