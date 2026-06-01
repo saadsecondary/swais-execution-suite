@@ -75,7 +75,11 @@ const Footer = () => {
             </h4>
             <ul className="space-y-3 text-sm text-ice/65">
               <li>
-                <a href="mailto:team@swais.net" className="hover:text-ice transition-colors">
+                <a
+                  href="mailto:team@swais.net"
+                  onClick={copyEmailHandler("team@swais.net")}
+                  className="hover:text-ice transition-colors"
+                >
                   team@swais.net
                 </a>
               </li>
