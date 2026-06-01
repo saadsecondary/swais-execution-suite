@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
-import { ArrowLeft, ArrowRight, MapPin, Clock, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, MapPin, Clock, Sparkles, Mail, Copy } from "lucide-react";
 import Navbar from "@/components/swais/Navbar";
 import Footer from "@/components/swais/Footer";
 import BrandBackdrop from "@/components/swais/BrandBackdrop";
 import WhatsAppButton from "@/components/swais/WhatsAppButton";
 import { Button } from "@/components/ui/button";
+import { copyEmailHandler } from "@/lib/copyEmail";
 
 type Role = {
   title: string;
