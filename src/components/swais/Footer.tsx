@@ -112,12 +112,14 @@ const Footer = () => {
           <div className="flex gap-6">
             <a
               href="mailto:team@swais.net?subject=Privacy%20policy%20request"
+              onClick={copyEmailHandler("team@swais.net")}
               className="hover:text-ice transition-colors"
             >
               Privacy
             </a>
             <a
               href="mailto:team@swais.net?subject=Terms%20of%20service%20request"
+              onClick={copyEmailHandler("team@swais.net")}
               className="hover:text-ice transition-colors"
             >
               Terms
