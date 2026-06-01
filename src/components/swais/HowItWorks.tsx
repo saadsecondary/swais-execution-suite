@@ -1,5 +1,5 @@
-import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
-import { useRef, useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import SectionHeading from "./SectionHeading";
 import { Spotlight } from "@/components/ui/spotlight";
 
@@ -21,6 +21,27 @@ const steps = [
   },
 ];
 
+/**
+ * Lights up the orb the instant 2% of it enters the viewport, so the activation
+ * lines up exactly with the cobalt line visually touching the orb's outer edge.
+ * Re-triggers every time the orb scrolls back into view.
+ */
+const useOrbActive = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setActive(entry.isIntersecting),
+      { threshold: 0.02 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return { ref, active };
+};
+
 const HowItWorks = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -28,19 +49,7 @@ const HowItWorks = () => {
     offset: ["start 80%", "end 20%"],
   });
   const pathLength = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const [reached, setReached] = useState<boolean[]>([false, false, false]);
 
-  // Each orb activates as the drawn line crosses its position.
-  // Steps are evenly spaced, so thresholds are 0.15, 0.5, 0.85.
-  const thresholds = [0.15, 0.5, 0.85];
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
-    setReached((prev) => {
-      const next = thresholds.map((t) => v >= t);
-      // Avoid re-renders when nothing changed
-      if (next.every((r, i) => r === prev[i])) return prev;
-      return next;
-    });
-  });
 
   return (
     <section id="process" className="py-28 md:py-36 relative overflow-hidden">
