@@ -1,0 +1,40 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import Index from "./pages/Index.tsx";
+import NotFound from "./pages/NotFound.tsx";
+import Products from "./pages/Products.tsx";
+import About from "./pages/About.tsx";
+import Careers from "./pages/Careers.tsx";
+import { preloadHeroVideo } from "@/lib/heroVideo";
+
+const queryClient = new QueryClient();
+
+const App = () => {
+  useEffect(() => {
+    preloadHeroVideo();
+  }, []);
+  return (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/careers" element={<Careers />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+  );
+};
+
+export default App;
