@@ -115,8 +115,8 @@ const Careers = () => {
               </p>
             </div>
 
-            <div className="mt-14 glass rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-6 justify-between">
-              <div className="max-w-xl">
+            <div className="mt-14 grid md:grid-cols-2 gap-5">
+              <div className="glass rounded-3xl p-8 md:p-10">
                 <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-cobalt-bright mb-2">
                   Don't see your role?
                 </p>
@@ -128,18 +128,38 @@ const Careers = () => {
                   reason to start a conversation. Send a short note and a link to something
                   you've shipped.
                 </p>
+                <Button variant="cobalt" size="lg" asChild className="mt-6">
+                  <a
+                    href="mailto:team@swais.net?subject=Open%20application%20%E2%80%94%20SWAIS"
+                    onClick={copyEmailHandler("team@swais.net")}
+                  >
+                    Email the team <ArrowRight className="h-4 w-4" />
+                  </a>
+                </Button>
               </div>
-              <Button variant="cobalt" size="lg" asChild>
-                <a href="mailto:team@swais.net?subject=Open%20application%20%E2%80%94%20SWAIS&body=Hi%20SWAIS%20team%2C%0A%0AI%27m%20reaching%20out%20about%20joining%20the%20team.%20A%20bit%20about%20me%3A%0A%0A-%20%0A%0AHere%27s%20something%20I%27ve%20shipped%3A%0A%0A-%20%0A%0AThanks%2C%0A">
-                  Email the team <ArrowRight className="h-4 w-4" />
-                </a>
-              </Button>
-              <a
-                href="mailto:team@swais.net"
-                className="text-[11px] font-mono uppercase tracking-[0.2em] text-ice/50 hover:text-cobalt-bright transition-colors -mt-2"
+
+              <button
+                type="button"
+                onClick={copyEmailHandler("team@swais.net")}
+                className="group text-left glass rounded-3xl p-8 md:p-10 hover:border-cobalt-bright/40 transition-colors duration-500 relative overflow-hidden"
               >
-                or copy → team@swais.net
-              </a>
+                <div className="h-12 w-12 rounded-2xl glass flex items-center justify-center mb-6 group-hover:border-cobalt-bright/40 transition-colors duration-500">
+                  <Mail className="h-4.5 w-4.5 text-ice" strokeWidth={1.5} />
+                </div>
+                <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-cobalt-bright mb-2">
+                  Direct line
+                </p>
+                <h3 className="font-display text-xl md:text-2xl font-medium text-ice tracking-tight">
+                  team@swais.net
+                </h3>
+                <p className="text-ice/60 text-[14.5px] leading-relaxed mt-3">
+                  Tap the card to copy the address. We read every message and reply
+                  personally within two business days.
+                </p>
+                <span className="mt-6 inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-ice/60 group-hover:text-cobalt-bright transition-colors">
+                  <Copy className="h-3.5 w-3.5" /> Click to copy
+                </span>
+              </button>
             </div>
           </div>
         </div>
