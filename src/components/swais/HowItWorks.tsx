@@ -42,6 +42,83 @@ const useOrbActive = () => {
   return { ref, active };
 };
 
+const Step = ({ n, title, desc }: { n: string; title: string; desc: string }) => {
+  const orb = useOrbActive();
+  const active = orb.active;
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: false, amount: 0.15, margin: "0px 0px -60px 0px" }}
+      variants={{
+        hidden: {},
+        visible: { transition: { staggerChildren: 0.1 } },
+      }}
+      className="relative grid grid-cols-[64px_1fr] sm:grid-cols-[88px_1fr] gap-6 sm:gap-10 items-start"
+    >
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, scale: 0.9 },
+          visible: {
+            opacity: 1,
+            scale: 1,
+            transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+          },
+        }}
+        className="relative z-10 flex sm:justify-center"
+      >
+        <div
+          ref={orb.ref}
+          className="relative h-14 w-14 sm:h-20 sm:w-20 rounded-full flex items-center justify-center bg-background border overflow-hidden transition-all duration-500"
+          style={{
+            borderColor: active
+              ? "hsl(var(--cobalt-bright) / 0.7)"
+              : "hsl(var(--ice) / 0.12)",
+            boxShadow: active ? "0 0 30px hsl(220 100% 50% / 0.45)" : "none",
+          }}
+        >
+          <div
+            className="absolute inset-0 transition-opacity duration-500"
+            style={{
+              background:
+                "radial-gradient(circle at 30% 30%, hsl(220 100% 55% / 0.45), transparent 70%)",
+              opacity: active ? 1 : 0,
+            }}
+          />
+          <span
+            className="relative font-mono text-sm sm:text-base tracking-widest transition-colors duration-500"
+            style={{
+              color: active
+                ? "hsl(var(--cobalt-bright))"
+                : "hsl(var(--ice) / 0.55)",
+            }}
+          >
+            {n}
+          </span>
+        </div>
+      </motion.div>
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, x: -20 },
+          visible: {
+            opacity: 1,
+            x: 0,
+            transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+          },
+        }}
+        className="pt-2 sm:pt-4"
+      >
+        <h3 className="text-3xl sm:text-4xl md:text-5xl font-display font-medium tracking-[-0.03em] text-ice">
+          {title}
+        </h3>
+        <p className="text-ice/60 text-[15px] md:text-base leading-relaxed mt-4 max-w-xl">
+          {desc}
+        </p>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 const HowItWorks = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
