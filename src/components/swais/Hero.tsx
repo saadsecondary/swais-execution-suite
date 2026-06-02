@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Compass } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import loaderBg from "@/assets/loader-bg.png";
+import { getHeroVideo } from "@/lib/heroVideo";
 
 /**
  * Animated counter that ticks up to a target whenever it enters the viewport,
@@ -64,50 +66,94 @@ const Counter = ({
 };
 
 const Hero = () => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLDivElement>(null);
   const [videoReady, setVideoReady] = useState(false);
-  const [showLoader, setShowLoader] = useState(false);
   const [progress, setProgress] = useState(0);
-
-  // Loading bar only appears on the 2nd visit onwards — never on the first visit.
-  useEffect(() => {
-    try {
-      const key = "swais_hero_visited";
-      if (localStorage.getItem(key)) setShowLoader(true);
-      else localStorage.setItem(key, "1");
-    } catch {}
-  }, []);
 
   // Make sure the video plays the instant it can — never wait for full load.
   useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    const tryPlay = () => {
-      const p = v.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
+    const host = videoRef.current;
+    if (!host) return;
+
+    const video = getHeroVideo();
+    host.appendChild(video);
+    const mountedAt = performance.now();
+
+    let progressTimer = 0;
+    let revealTimer = 0;
+    const clearProgressTimer = () => {
+      if (progressTimer) {
+        window.clearInterval(progressTimer);
+        progressTimer = 0;
+      }
     };
-    const onReady = () => {
-      tryPlay();
-      setVideoReady(true);
-      setProgress(100);
+    const clearRevealTimer = () => {
+      if (revealTimer) {
+        window.clearTimeout(revealTimer);
+        revealTimer = 0;
+      }
     };
-    const onProgress = () => {
+
+    const updateBufferedProgress = () => {
       try {
-        if (v.buffered.length && v.duration) {
-          const end = v.buffered.end(v.buffered.length - 1);
-          setProgress((p) => Math.max(p, Math.min(99, Math.round((end / v.duration) * 100))));
+        if (video.buffered.length && video.duration) {
+          const end = video.buffered.end(video.buffered.length - 1);
+          const percent = Math.round((end / video.duration) * 100);
+          setProgress((current) => Math.max(current, Math.min(percent, 92)));
         }
       } catch {}
     };
-    tryPlay();
-    v.addEventListener("canplay", onReady);
-    v.addEventListener("loadeddata", onReady);
-    v.addEventListener("progress", onProgress);
-    if (v.readyState >= 3) onReady();
+
+    const revealVideo = () => {
+      clearProgressTimer();
+      video.style.opacity = "1";
+      setProgress(100);
+      clearRevealTimer();
+      const remaining = Math.max(0, 520 - (performance.now() - mountedAt));
+      revealTimer = window.setTimeout(() => {
+        setVideoReady(true);
+      }, remaining);
+    };
+
+    const kickPlayback = () => {
+      const playPromise = video.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {});
+      }
+    };
+
+    const onCanPlay = () => {
+      kickPlayback();
+      revealVideo();
+    };
+
+    const onLoadedData = () => {
+      kickPlayback();
+      setProgress((current) => Math.max(current, 55));
+    };
+
+    progressTimer = window.setInterval(() => {
+      setProgress((current) => Math.min(current + 1, 88));
+    }, 45);
+
+    updateBufferedProgress();
+    kickPlayback();
+
+    video.addEventListener("progress", updateBufferedProgress);
+    video.addEventListener("canplay", onCanPlay);
+    video.addEventListener("loadeddata", onLoadedData);
+
+    if (video.readyState >= 3) {
+      onCanPlay();
+    }
+
     return () => {
-      v.removeEventListener("canplay", onReady);
-      v.removeEventListener("loadeddata", onReady);
-      v.removeEventListener("progress", onProgress);
+      clearProgressTimer();
+      clearRevealTimer();
+      video.removeEventListener("progress", updateBufferedProgress);
+      video.removeEventListener("canplay", onCanPlay);
+      video.removeEventListener("loadeddata", onLoadedData);
+      if (host.contains(video)) host.removeChild(video);
     };
   }, []);
 
@@ -118,27 +164,38 @@ const Hero = () => {
       // Solid brand color matches the first video frame — no poster image, so it never reads as a paused picture.
       style={{ backgroundColor: "#04276d" }}
     >
-      <video
-        ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
-        src="/hero-bg.mp4"
-        preload="auto"
-        autoPlay
-        muted
-        loop
-        playsInline
-        {...({ fetchpriority: "high", playsinline: "" } as Record<string, string>)}
-        aria-hidden="true"
-      />
+      <div ref={videoRef} className="absolute inset-0 z-0" aria-hidden="true" />
 
-      {/* Thin progress bar — only on 2nd+ visits, only until the video can play. */}
-      {showLoader && !videoReady && (
-        <div className="absolute top-0 inset-x-0 z-[2] pointer-events-none">
-          <div className="h-[2px] w-full bg-white/10">
-            <div
-              className="h-full bg-cobalt-bright shadow-[0_0_12px_hsl(var(--cobalt-bright))] transition-[width] duration-200 ease-out"
-              style={{ width: `${Math.max(progress, 5)}%` }}
-            />
+      {!videoReady && (
+        <div className="absolute inset-0 z-[1] overflow-hidden">
+          <img
+            src={loaderBg}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="eager"
+            decoding="async"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--ink)/0.12),hsl(var(--ink)/0.22))]" />
+        </div>
+      )}
+
+      {/* Visible loader until the video is actually ready and has had a beat to feel intentional. */}
+      {!videoReady && (
+        <div className="absolute inset-0 z-[3] pointer-events-none">
+          <div className="absolute inset-x-0 bottom-8 sm:bottom-10">
+            <div className="mx-auto flex w-full max-w-md px-6">
+              <div className="w-full rounded-full border border-ice/15 bg-ink/40 p-1 shadow-[0_18px_50px_hsl(var(--ink)/0.45)] backdrop-blur-md">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-ice/10">
+                  <div
+                    className="relative h-full rounded-full bg-[linear-gradient(90deg,hsl(var(--azure)),hsl(var(--cobalt-bright))_45%,hsl(var(--primary-glow)))] shadow-[0_0_30px_hsl(var(--cobalt-bright)/0.85)] transition-[width] duration-200 ease-out"
+                    style={{ width: `${Math.max(progress, 12)}%` }}
+                  >
+                    <span className="absolute inset-y-0 right-0 w-12 rounded-full bg-ice/50 blur-md" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
