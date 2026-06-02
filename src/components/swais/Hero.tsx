@@ -65,6 +65,18 @@ const Counter = ({
 
 const Hero = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoReady, setVideoReady] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  // Loading bar only appears on the 2nd visit onwards — never on the first visit.
+  useEffect(() => {
+    try {
+      const key = "swais_hero_visited";
+      if (localStorage.getItem(key)) setShowLoader(true);
+      else localStorage.setItem(key, "1");
+    } catch {}
+  }, []);
 
   // Make sure the video plays the instant it can — never wait for full load.
   useEffect(() => {
@@ -74,10 +86,28 @@ const Hero = () => {
       const p = v.play();
       if (p && typeof p.catch === "function") p.catch(() => {});
     };
+    const onReady = () => {
+      tryPlay();
+      setVideoReady(true);
+      setProgress(100);
+    };
+    const onProgress = () => {
+      try {
+        if (v.buffered.length && v.duration) {
+          const end = v.buffered.end(v.buffered.length - 1);
+          setProgress((p) => Math.max(p, Math.min(99, Math.round((end / v.duration) * 100))));
+        }
+      } catch {}
+    };
     tryPlay();
-    v.addEventListener("loadeddata", tryPlay, { once: true });
+    v.addEventListener("canplay", onReady);
+    v.addEventListener("loadeddata", onReady);
+    v.addEventListener("progress", onProgress);
+    if (v.readyState >= 3) onReady();
     return () => {
-      v.removeEventListener("loadeddata", tryPlay);
+      v.removeEventListener("canplay", onReady);
+      v.removeEventListener("loadeddata", onReady);
+      v.removeEventListener("progress", onProgress);
     };
   }, []);
 
@@ -85,14 +115,13 @@ const Hero = () => {
     <section
       id="top"
       className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden"
-      // Match the dominant color of the first frame so any 1ms gap is invisible.
+      // Solid brand color matches the first video frame — no poster image, so it never reads as a paused picture.
       style={{ backgroundColor: "#04276d" }}
     >
       <video
         ref={videoRef}
         className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
         src="/hero-bg.mp4"
-        poster="/hero-poster.jpg"
         preload="auto"
         autoPlay
         muted
@@ -101,6 +130,18 @@ const Hero = () => {
         {...({ fetchpriority: "high", playsinline: "" } as Record<string, string>)}
         aria-hidden="true"
       />
+
+      {/* Thin progress bar — only on 2nd+ visits, only until the video can play. */}
+      {showLoader && !videoReady && (
+        <div className="absolute top-0 inset-x-0 z-[2] pointer-events-none">
+          <div className="h-[2px] w-full bg-white/10">
+            <div
+              className="h-full bg-cobalt-bright shadow-[0_0_12px_hsl(var(--cobalt-bright))] transition-[width] duration-200 ease-out"
+              style={{ width: `${Math.max(progress, 5)}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Bottom blend into the page background — NOT an overlay on the video,
           purely a transition strip below the visible video area. */}
