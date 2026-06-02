@@ -69,6 +69,7 @@ const Hero = () => {
   const videoRef = useRef<HTMLDivElement>(null);
   const [videoReady, setVideoReady] = useState(false);
   const [progress, setProgress] = useState(0);
+  const loaderMinVisibleMs = 900;
 
   // Make sure the video plays the instant it can — never wait for full load.
   useEffect(() => {
@@ -109,7 +110,7 @@ const Hero = () => {
       video.style.opacity = "1";
       setProgress(100);
       clearRevealTimer();
-      const remaining = Math.max(0, 520 - (performance.now() - mountedAt));
+      const remaining = Math.max(0, loaderMinVisibleMs - (performance.now() - mountedAt));
       revealTimer = window.setTimeout(() => {
         setVideoReady(true);
       }, remaining);
@@ -182,11 +183,11 @@ const Hero = () => {
 
       {/* Visible loader until the video is actually ready and has had a beat to feel intentional. */}
       {!videoReady && (
-        <div className="absolute inset-0 z-[3] pointer-events-none">
-          <div className="absolute inset-x-0 bottom-8 sm:bottom-10">
-            <div className="mx-auto flex w-full max-w-md px-6">
+        <div className="absolute inset-0 z-20 pointer-events-none">
+          <div className="absolute inset-x-0 bottom-10 sm:bottom-14">
+            <div className="mx-auto flex w-full max-w-lg px-6">
               <div className="w-full rounded-full border border-ice/15 bg-ink/40 p-1 shadow-[0_18px_50px_hsl(var(--ink)/0.45)] backdrop-blur-md">
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-ice/10">
+                <div className="h-3 w-full overflow-hidden rounded-full bg-ice/10">
                   <div
                     className="relative h-full rounded-full bg-[linear-gradient(90deg,hsl(var(--azure)),hsl(var(--cobalt-bright))_45%,hsl(var(--primary-glow)))] shadow-[0_0_30px_hsl(var(--cobalt-bright)/0.85)] transition-[width] duration-200 ease-out"
                     style={{ width: `${Math.max(progress, 12)}%` }}
@@ -204,7 +205,7 @@ const Hero = () => {
           purely a transition strip below the visible video area. */}
       <div className="absolute bottom-0 inset-x-0 h-72 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-[1]" />
 
-      <div className="container-x relative z-10">
+      <div className={`container-x relative z-10 transition-opacity duration-300 ${videoReady ? "opacity-100" : "opacity-0"}`}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
