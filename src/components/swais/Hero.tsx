@@ -69,7 +69,7 @@ const Hero = () => {
   const videoRef = useRef<HTMLDivElement>(null);
   const [videoReady, setVideoReady] = useState(false);
   const [progress, setProgress] = useState(0);
-  const loaderMinVisibleMs = 900;
+  const loaderMinVisibleMs = 1800;
 
   // Make sure the video plays the instant it can — never wait for full load.
   useEffect(() => {
@@ -184,6 +184,7 @@ const Hero = () => {
       {/* Visible loader until the video is actually ready and has had a beat to feel intentional. */}
       {!videoReady && (
         <div className="absolute inset-0 z-20 pointer-events-none">
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--ink)/0.08),hsl(var(--ink)/0.18))]" />
           <div className="absolute inset-x-0 bottom-10 sm:bottom-14">
             <div className="mx-auto flex w-full max-w-lg px-6">
               <div className="w-full rounded-full border border-ice/15 bg-ink/40 p-1 shadow-[0_18px_50px_hsl(var(--ink)/0.45)] backdrop-blur-md">
