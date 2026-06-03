@@ -15,10 +15,9 @@ const ProductDetail = ({ product, index }: { product: Product; index: number }) 
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: false, amount: 0.15, margin: "0px 0px -80px 0px" }}
     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: index * 0.04 }}
-    className="space-y-6 md:space-y-8"
+    className="space-y-5 md:space-y-6"
   >
-    {/* Card 1 — Product overview */}
-    <div className="glass rounded-3xl p-6 sm:p-8 md:p-10">
+    <div className="glass rounded-3xl p-5 sm:p-6 md:p-7">
       <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
         <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ice/40">
           {product.index}
@@ -29,17 +28,17 @@ const ProductDetail = ({ product, index }: { product: Product; index: number }) 
         </span>
       </div>
 
-      <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-medium tracking-tight text-ice">
+      <h2 className="text-3xl sm:text-4xl md:text-[2.85rem] font-display font-medium tracking-tight text-ice">
         {product.code}
       </h2>
       <p className="serif italic text-ice/85 text-lg sm:text-xl md:text-2xl leading-snug mt-3 sm:mt-4 max-w-2xl">
         {product.headline}
       </p>
-      <p className="text-ice/65 text-[14px] sm:text-[15px] leading-relaxed mt-5 sm:mt-6 max-w-2xl">
+      <p className="text-ice/65 text-[14px] sm:text-[15px] leading-relaxed mt-4 sm:mt-5 max-w-2xl">
         {product.description}
       </p>
 
-      <div className="grid sm:grid-cols-2 gap-4 sm:gap-5 mt-7 sm:mt-8">
+      <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 mt-6 sm:mt-7">
         <div className="rounded-2xl border border-ice/10 p-5">
           <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ice/40 mb-2">
             The Outcome
@@ -55,9 +54,8 @@ const ProductDetail = ({ product, index }: { product: Product; index: number }) 
       </div>
     </div>
 
-    {/* Card 2 — Access tiers, deliberately separate so it never reads as one giant block */}
-    <div className="glass rounded-3xl p-6 sm:p-8 md:p-10">
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
+    <div className="space-y-4 sm:space-y-5 pt-1">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2.5">
         <div>
           <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-ice/40 mb-2">
             Access Tiers
@@ -70,16 +68,16 @@ const ProductDetail = ({ product, index }: { product: Product; index: number }) 
           Final tier is confirmed after consultation.
         </p>
       </div>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {product.tiers.map((t, i) => {
           const isMid = i === 1;
           return (
             <div
               key={t.name}
-              className={`relative rounded-3xl p-6 sm:p-7 transition-colors duration-500 border ${
+              className={`relative rounded-[1.45rem] p-5 sm:p-6 transition-colors duration-500 border ${
                 isMid
-                  ? "border-cobalt-bright/35 bg-cobalt/10"
-                  : "border-ice/10 bg-ice/[0.025]"
+                  ? "border-cobalt-bright/35 bg-cobalt/8"
+                  : "border-ice/10 bg-transparent"
               }`}
             >
               {isMid && (
@@ -90,10 +88,10 @@ const ProductDetail = ({ product, index }: { product: Product; index: number }) 
               <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-cobalt-bright mb-3">
                 {t.name}
               </p>
-              <p className="serif italic text-ice/90 text-base leading-snug min-h-[3rem]">
+              <p className="serif italic text-ice/90 text-base leading-snug min-h-[2.8rem]">
                 {t.tagline}
               </p>
-              <ul className="mt-5 sm:mt-6 space-y-3">
+              <ul className="mt-4 sm:mt-5 space-y-2.5">
                 {t.highlights.map((h) => (
                   <li
                     key={h}
@@ -111,7 +109,7 @@ const ProductDetail = ({ product, index }: { product: Product; index: number }) 
           );
         })}
       </div>
-      <div className="mt-7 sm:mt-8 flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4">
+      <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4 pt-1">
         <Button variant="cobalt" size="lg" asChild className="w-full sm:w-auto">
           <Link to="/#contact">
             Book a consultation for {product.code}
@@ -149,9 +147,9 @@ const ProductExplorer = ({ variant = "section" }: Props) => {
   }
 
   return (
-    <section id="systems" className="relative z-10 py-28 md:py-36">
+    <section id="systems" className="relative z-10 py-22 md:py-28">
       <div className="container-x">
-        <div className="max-w-3xl mb-16">
+        <div className="max-w-3xl mb-11 md:mb-12">
           <p className="text-cobalt-bright text-[11px] tracking-[0.3em] uppercase font-mono mb-5">
             02 / The Stack
           </p>
@@ -160,14 +158,14 @@ const ProductExplorer = ({ variant = "section" }: Props) => {
             <span className="serif text-cobalt-bright font-normal">One</span>{" "}
             <span className="text-gradient">intelligence layer.</span>
           </h2>
-          <p className="text-ice/55 mt-6 text-[15px] max-w-xl leading-relaxed">
+          <p className="text-ice/55 mt-5 text-[15px] max-w-xl leading-relaxed">
             Pick a system to see what it does, who it's for, and what comes
             with each access tier. Final pricing is set after the discovery
             call, once we know the shape of your operation.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-10 lg:gap-14">
+        <div className="grid lg:grid-cols-12 gap-7 lg:gap-10 items-start">
           <aside className="lg:col-span-4">
             <div className="glass rounded-3xl p-3 lg:sticky lg:top-28">
               <ul className="flex flex-col gap-1">
