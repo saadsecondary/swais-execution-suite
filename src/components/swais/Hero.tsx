@@ -72,8 +72,6 @@ const Hero = () => {
     if (!host) return;
     const video = getHeroVideo();
     host.appendChild(video);
-    // Show video immediately — first paint or as soon as the browser allows.
-    video.style.opacity = "1";
     const play = () => {
       const p = video.play();
       if (p && typeof p.catch === "function") p.catch(() => {});
@@ -91,14 +89,13 @@ const Hero = () => {
   return (
     <section
       id="top"
-      className="relative min-h-screen flex items-center pt-28 sm:pt-32 pb-16 sm:pb-20 overflow-hidden"
-      // Solid brand color matches the first video frame — no poster image needed.
-      style={{ backgroundColor: "#04276d" }}
+      className="relative min-h-screen flex items-center pt-28 sm:pt-32 pb-14 sm:pb-18 overflow-hidden bg-background"
     >
       <div ref={videoHostRef} className="absolute inset-0 z-0" aria-hidden="true" />
 
       {/* Bottom blend into the page background */}
-      <div className="absolute bottom-0 inset-x-0 h-56 sm:h-72 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-[1]" />
+      <div className="absolute inset-0 z-[1] bg-[linear-gradient(to_bottom,hsl(var(--background)/0.16),hsl(var(--background)/0.34)_52%,hsl(var(--background)/0.76)_100%)] pointer-events-none" />
+      <div className="absolute bottom-0 inset-x-0 h-48 sm:h-64 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-[1]" />
 
       <div className="container-x relative z-10">
         <motion.div
@@ -111,7 +108,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="inline-flex items-center gap-2.5 glass rounded-full px-3.5 sm:px-4 py-1.5 mb-8 sm:mb-10 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.18em] sm:tracking-[0.22em]"
+            className="inline-flex items-center gap-2.5 glass rounded-full px-3.5 sm:px-4 py-1.5 mb-6 sm:mb-8 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.18em] sm:tracking-[0.22em]"
           >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full rounded-full bg-cobalt-bright opacity-70 animate-ping" />
@@ -170,7 +167,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.85 }}
-            className="mt-6 sm:mt-8 text-sm sm:text-base md:text-lg text-ice/65 max-w-2xl mx-auto leading-relaxed px-2"
+            className="mt-5 sm:mt-6 text-sm sm:text-base md:text-lg text-ice/65 max-w-2xl mx-auto leading-relaxed px-2"
           >
             The world's leading AI automation studio engineering done-for-you
             systems that crush bottlenecks, cut overhead, and compound revenue
@@ -181,7 +178,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1 }}
-            className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
+            className="mt-7 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3"
           >
             <Button variant="cobalt" size="lg" asChild className="w-full sm:w-auto">
               <a href="#contact">
@@ -199,7 +196,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.2 }}
-            className="mt-10 sm:mt-12 inline-flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-5 gap-y-2 font-mono text-[10px] sm:text-[11px] md:text-[12px] uppercase tracking-[0.18em] sm:tracking-[0.22em] text-ice/60"
+            className="mt-8 sm:mt-10 inline-flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-5 gap-y-2 font-mono text-[10px] sm:text-[11px] md:text-[12px] uppercase tracking-[0.18em] sm:tracking-[0.22em] text-ice/60"
           >
             <span>
               <Counter to={6} delay={1.3} duration={1.4} />
