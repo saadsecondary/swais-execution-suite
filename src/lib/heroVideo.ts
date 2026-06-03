@@ -8,9 +8,16 @@
  */
 let videoEl: HTMLVideoElement | null = null;
 let loopGuardFrame = 0;
+let handoffDispatched = false;
 
 const HERO_LOOP_IN_POINT = 0.12;
 const HERO_LOOP_OUT_PADDING = 0.18;
+
+const dispatchHeroHandoff = () => {
+  if (handoffDispatched || typeof window === "undefined") return;
+  handoffDispatched = true;
+  window.dispatchEvent(new CustomEvent("swais:hero-handoff"));
+};
 
 const attemptPlay = (video: HTMLVideoElement) => {
   const playPromise = video.play();
@@ -59,8 +66,7 @@ export const getHeroVideo = (): HTMLVideoElement => {
     v.setAttribute("fetchpriority", "high");
     v.className =
       "absolute inset-0 w-full h-full object-cover pointer-events-none z-0";
-    v.style.opacity = "0";
-    v.style.transition = "opacity 360ms var(--ease-elite)";
+    v.style.opacity = "1";
     v.addEventListener("loadedmetadata", () => {
       if (v.currentTime <= 0.01) {
         try {
@@ -70,9 +76,11 @@ export const getHeroVideo = (): HTMLVideoElement => {
       attemptPlay(v);
     });
     v.addEventListener("canplay", () => {
+      dispatchHeroHandoff();
       attemptPlay(v);
     });
     v.addEventListener("play", () => {
+      dispatchHeroHandoff();
       startLoopGuard(v);
     });
     v.addEventListener("pause", stopLoopGuard);
