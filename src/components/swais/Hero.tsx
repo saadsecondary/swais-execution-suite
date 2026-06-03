@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Compass } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import loaderBg from "@/assets/loader-bg.png";
 import { getHeroVideo } from "@/lib/heroVideo";
 
 /**
@@ -66,94 +65,25 @@ const Counter = ({
 };
 
 const Hero = () => {
-  const videoRef = useRef<HTMLDivElement>(null);
-  const [videoReady, setVideoReady] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const loaderMinVisibleMs = 1800;
+  const videoHostRef = useRef<HTMLDivElement>(null);
 
-  // Make sure the video plays the instant it can — never wait for full load.
   useEffect(() => {
-    const host = videoRef.current;
+    const host = videoHostRef.current;
     if (!host) return;
-
     const video = getHeroVideo();
     host.appendChild(video);
-    const mountedAt = performance.now();
-
-    let progressTimer = 0;
-    let revealTimer = 0;
-    const clearProgressTimer = () => {
-      if (progressTimer) {
-        window.clearInterval(progressTimer);
-        progressTimer = 0;
-      }
+    // Show video immediately — first paint or as soon as the browser allows.
+    video.style.opacity = "1";
+    const play = () => {
+      const p = video.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
     };
-    const clearRevealTimer = () => {
-      if (revealTimer) {
-        window.clearTimeout(revealTimer);
-        revealTimer = 0;
-      }
-    };
-
-    const updateBufferedProgress = () => {
-      try {
-        if (video.buffered.length && video.duration) {
-          const end = video.buffered.end(video.buffered.length - 1);
-          const percent = Math.round((end / video.duration) * 100);
-          setProgress((current) => Math.max(current, Math.min(percent, 92)));
-        }
-      } catch {}
-    };
-
-    const revealVideo = () => {
-      clearProgressTimer();
-      video.style.opacity = "1";
-      setProgress(100);
-      clearRevealTimer();
-      const remaining = Math.max(0, loaderMinVisibleMs - (performance.now() - mountedAt));
-      revealTimer = window.setTimeout(() => {
-        setVideoReady(true);
-      }, remaining);
-    };
-
-    const kickPlayback = () => {
-      const playPromise = video.play();
-      if (playPromise && typeof playPromise.catch === "function") {
-        playPromise.catch(() => {});
-      }
-    };
-
-    const onCanPlay = () => {
-      kickPlayback();
-      revealVideo();
-    };
-
-    const onLoadedData = () => {
-      kickPlayback();
-      setProgress((current) => Math.max(current, 55));
-    };
-
-    progressTimer = window.setInterval(() => {
-      setProgress((current) => Math.min(current + 1, 88));
-    }, 45);
-
-    updateBufferedProgress();
-    kickPlayback();
-
-    video.addEventListener("progress", updateBufferedProgress);
-    video.addEventListener("canplay", onCanPlay);
-    video.addEventListener("loadeddata", onLoadedData);
-
-    if (video.readyState >= 3) {
-      onCanPlay();
-    }
-
+    play();
+    video.addEventListener("canplay", play);
+    video.addEventListener("loadeddata", play);
     return () => {
-      clearProgressTimer();
-      clearRevealTimer();
-      video.removeEventListener("progress", updateBufferedProgress);
-      video.removeEventListener("canplay", onCanPlay);
-      video.removeEventListener("loadeddata", onLoadedData);
+      video.removeEventListener("canplay", play);
+      video.removeEventListener("loadeddata", play);
       if (host.contains(video)) host.removeChild(video);
     };
   }, []);
@@ -161,52 +91,16 @@ const Hero = () => {
   return (
     <section
       id="top"
-      className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden"
-      // Solid brand color matches the first video frame — no poster image, so it never reads as a paused picture.
+      className="relative min-h-screen flex items-center pt-28 sm:pt-32 pb-16 sm:pb-20 overflow-hidden"
+      // Solid brand color matches the first video frame — no poster image needed.
       style={{ backgroundColor: "#04276d" }}
     >
-      <div ref={videoRef} className="absolute inset-0 z-0" aria-hidden="true" />
+      <div ref={videoHostRef} className="absolute inset-0 z-0" aria-hidden="true" />
 
-      {!videoReady && (
-        <div className="absolute inset-0 z-[1] overflow-hidden">
-          <img
-            src={loaderBg}
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="eager"
-            decoding="async"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--ink)/0.12),hsl(var(--ink)/0.22))]" />
-        </div>
-      )}
+      {/* Bottom blend into the page background */}
+      <div className="absolute bottom-0 inset-x-0 h-56 sm:h-72 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-[1]" />
 
-      {/* Visible loader until the video is actually ready and has had a beat to feel intentional. */}
-      {!videoReady && (
-        <div className="absolute inset-0 z-20 pointer-events-none">
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--ink)/0.08),hsl(var(--ink)/0.18))]" />
-          <div className="absolute inset-x-0 bottom-10 sm:bottom-14">
-            <div className="mx-auto flex w-full max-w-lg px-6">
-              <div className="w-full rounded-full border border-ice/15 bg-ink/40 p-1 shadow-[0_18px_50px_hsl(var(--ink)/0.45)] backdrop-blur-md">
-                <div className="h-3 w-full overflow-hidden rounded-full bg-ice/10">
-                  <div
-                    className="relative h-full rounded-full bg-[linear-gradient(90deg,hsl(var(--azure)),hsl(var(--cobalt-bright))_45%,hsl(var(--primary-glow)))] shadow-[0_0_30px_hsl(var(--cobalt-bright)/0.85)] transition-[width] duration-200 ease-out"
-                    style={{ width: `${Math.max(progress, 12)}%` }}
-                  >
-                    <span className="absolute inset-y-0 right-0 w-12 rounded-full bg-ice/50 blur-md" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Bottom blend into the page background — NOT an overlay on the video,
-          purely a transition strip below the visible video area. */}
-      <div className="absolute bottom-0 inset-x-0 h-72 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-[1]" />
-
-      <div className={`container-x relative z-10 transition-opacity duration-300 ${videoReady ? "opacity-100" : "opacity-0"}`}>
+      <div className="container-x relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -217,16 +111,16 @@ const Hero = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="inline-flex items-center gap-2.5 glass rounded-full px-4 py-1.5 mb-10 text-[11px] font-mono uppercase tracking-[0.22em]"
+            className="inline-flex items-center gap-2.5 glass rounded-full px-3.5 sm:px-4 py-1.5 mb-8 sm:mb-10 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.18em] sm:tracking-[0.22em]"
           >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full rounded-full bg-cobalt-bright opacity-70 animate-ping" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-cobalt-bright shadow-[0_0_12px_hsl(var(--cobalt-bright))]" />
             </span>
-            <span className="text-ice/75">New · Direct consultations open with the SWAIS team</span>
+            <span className="text-ice/75">New · Direct consultations open</span>
           </motion.div>
 
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[6.5rem] font-medium leading-[0.96] tracking-[-0.04em] text-balance">
+          <h1 className="text-[2.6rem] xs:text-5xl sm:text-6xl md:text-7xl lg:text-[6.5rem] font-medium leading-[1] sm:leading-[0.96] tracking-[-0.035em] sm:tracking-[-0.04em] text-balance">
             {["Automate", "the", "work,"].map((w, i) => (
               <motion.span
                 key={`a-${i}`}
@@ -276,7 +170,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.85 }}
-            className="mt-8 text-base md:text-lg text-ice/60 max-w-2xl mx-auto leading-relaxed"
+            className="mt-6 sm:mt-8 text-sm sm:text-base md:text-lg text-ice/65 max-w-2xl mx-auto leading-relaxed px-2"
           >
             The world's leading AI automation studio engineering done-for-you
             systems that crush bottlenecks, cut overhead, and compound revenue
@@ -287,14 +181,14 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1 }}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
+            className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
           >
-            <Button variant="cobalt" size="lg" asChild>
+            <Button variant="cobalt" size="lg" asChild className="w-full sm:w-auto">
               <a href="#contact">
                 Start with a Consultation <ArrowRight className="h-4 w-4" />
               </a>
             </Button>
-            <Button variant="glass" size="lg" asChild>
+            <Button variant="glass" size="lg" asChild className="w-full sm:w-auto">
               <a href="#systems">
                 <Compass className="h-4 w-4" /> See Our Systems
               </a>
@@ -305,7 +199,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.2 }}
-            className="mt-12 inline-flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-mono text-[11px] md:text-[12px] uppercase tracking-[0.22em] text-ice/60"
+            className="mt-10 sm:mt-12 inline-flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-5 gap-y-2 font-mono text-[10px] sm:text-[11px] md:text-[12px] uppercase tracking-[0.18em] sm:tracking-[0.22em] text-ice/60"
           >
             <span>
               <Counter to={6} delay={1.3} duration={1.4} />

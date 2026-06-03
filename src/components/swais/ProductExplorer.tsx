@@ -15,29 +15,31 @@ const ProductDetail = ({ product, index }: { product: Product; index: number }) 
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: false, amount: 0.15, margin: "0px 0px -80px 0px" }}
     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: index * 0.04 }}
+    className="space-y-6 md:space-y-8"
   >
-    <div className="glass rounded-3xl p-8 md:p-10">
-      <div className="flex items-center gap-3 mb-6">
+    {/* Card 1 — Product overview */}
+    <div className="glass rounded-3xl p-6 sm:p-8 md:p-10">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
         <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ice/40">
           {product.index}
         </span>
         <span className="h-px w-8 bg-cobalt-bright/40" />
-        <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-cobalt-bright">
+        <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.22em] sm:tracking-[0.25em] text-cobalt-bright">
           {product.label}
         </span>
       </div>
 
-      <h2 className="text-3xl md:text-5xl font-display font-medium tracking-tight text-ice">
+      <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-medium tracking-tight text-ice">
         {product.code}
       </h2>
-      <p className="serif italic text-ice/85 text-xl md:text-2xl leading-snug mt-4 max-w-2xl">
+      <p className="serif italic text-ice/85 text-lg sm:text-xl md:text-2xl leading-snug mt-3 sm:mt-4 max-w-2xl">
         {product.headline}
       </p>
-      <p className="text-ice/65 text-[15px] leading-relaxed mt-6 max-w-2xl">
+      <p className="text-ice/65 text-[14px] sm:text-[15px] leading-relaxed mt-5 sm:mt-6 max-w-2xl">
         {product.description}
       </p>
 
-      <div className="grid sm:grid-cols-2 gap-5 mt-8">
+      <div className="grid sm:grid-cols-2 gap-4 sm:gap-5 mt-7 sm:mt-8">
         <div className="rounded-2xl border border-ice/10 p-5">
           <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-ice/40 mb-2">
             The Outcome
@@ -51,71 +53,74 @@ const ProductDetail = ({ product, index }: { product: Product; index: number }) 
           <p className="text-ice/85 text-sm leading-relaxed">{product.audience}</p>
         </div>
       </div>
+    </div>
 
-      <div className="mt-10">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
-          <div>
-            <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-ice/40 mb-2">
-              Access Tiers
-            </p>
-            <h3 className="text-xl md:text-2xl font-display font-medium tracking-tight text-ice">
-              Scope, not price.
-            </h3>
-          </div>
-          <p className="text-[11px] text-ice/40 font-mono uppercase tracking-wider md:text-right">
-            Final tier is confirmed after consultation.
+    {/* Card 2 — Access tiers, deliberately separate so it never reads as one giant block */}
+    <div className="glass rounded-3xl p-6 sm:p-8 md:p-10">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
+        <div>
+          <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-ice/40 mb-2">
+            Access Tiers
           </p>
+          <h3 className="text-xl sm:text-2xl font-display font-medium tracking-tight text-ice">
+            Scope, not price.
+          </h3>
         </div>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {product.tiers.map((t, i) => {
-            const isMid = i === 1;
-            return (
-              <div
-                key={t.name}
-                className={`relative rounded-3xl p-7 transition-colors duration-500 ${
-                  isMid ? "glass border border-cobalt-bright/30 bg-cobalt/10" : "glass"
-                }`}
-              >
-                {isMid && (
-                  <span className="absolute -top-2.5 left-7 bg-gradient-cobalt text-ice rounded-full px-2.5 py-0.5 text-[10px] font-medium tracking-wider uppercase shadow-cobalt">
-                    Most chosen
-                  </span>
-                )}
-                <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-cobalt-bright mb-3">
-                  {t.name}
-                </p>
-                <p className="serif italic text-ice/90 text-base leading-snug min-h-[3rem]">
-                  {t.tagline}
-                </p>
-                <ul className="mt-6 space-y-3">
-                  {t.highlights.map((h) => (
-                    <li
-                      key={h}
-                      className="flex items-start gap-2.5 text-[13.5px] text-ice/75 leading-snug"
-                    >
-                      <Check
-                        className="h-3.5 w-3.5 mt-1 shrink-0 text-cobalt-bright"
-                        strokeWidth={2.5}
-                      />
-                      <span>{h}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
-        <div className="mt-8 flex flex-col sm:flex-row flex-wrap items-center gap-4">
-          <Button variant="cobalt" size="lg" asChild>
-            <Link to="/#contact">
-              Book a consultation for {product.code}
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-          <p className="text-[11px] text-ice/45 font-mono uppercase tracking-wider">
-            Pricing is decided after discovery, never before.
-          </p>
-        </div>
+        <p className="text-[10px] sm:text-[11px] text-ice/40 font-mono uppercase tracking-wider md:text-right">
+          Final tier is confirmed after consultation.
+        </p>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {product.tiers.map((t, i) => {
+          const isMid = i === 1;
+          return (
+            <div
+              key={t.name}
+              className={`relative rounded-3xl p-6 sm:p-7 transition-colors duration-500 border ${
+                isMid
+                  ? "border-cobalt-bright/35 bg-cobalt/10"
+                  : "border-ice/10 bg-ice/[0.025]"
+              }`}
+            >
+              {isMid && (
+                <span className="absolute -top-2.5 left-6 bg-gradient-cobalt text-ice rounded-full px-2.5 py-0.5 text-[10px] font-medium tracking-wider uppercase shadow-cobalt">
+                  Most chosen
+                </span>
+              )}
+              <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-cobalt-bright mb-3">
+                {t.name}
+              </p>
+              <p className="serif italic text-ice/90 text-base leading-snug min-h-[3rem]">
+                {t.tagline}
+              </p>
+              <ul className="mt-5 sm:mt-6 space-y-3">
+                {t.highlights.map((h) => (
+                  <li
+                    key={h}
+                    className="flex items-start gap-2.5 text-[13.5px] text-ice/75 leading-snug"
+                  >
+                    <Check
+                      className="h-3.5 w-3.5 mt-1 shrink-0 text-cobalt-bright"
+                      strokeWidth={2.5}
+                    />
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-7 sm:mt-8 flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4">
+        <Button variant="cobalt" size="lg" asChild className="w-full sm:w-auto">
+          <Link to="/#contact">
+            Book a consultation for {product.code}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </Button>
+        <p className="text-[10px] sm:text-[11px] text-ice/45 font-mono uppercase tracking-wider">
+          Pricing is decided after discovery, never before.
+        </p>
       </div>
     </div>
   </motion.article>
